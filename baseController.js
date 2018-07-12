@@ -3,53 +3,51 @@ app = express(); //check for necessity in future
 
 User = require('./App/modules/User.js');
 
+//real auth tools here:
+var passport = require('passport');
+var LocalStrategy = require('passport-local');
+var passportLocalMongoose = require('passport-local-mongoose');
 
+app.use(require("express-session")({
+    secret: "someText",
+    resave: false,
+    saveUninitialized: false
+}));
 
-
-
-
-// //real auth tools here:
-// var passport = require('passport');
-// var LocalStrategy = require('passport-local');
-// var passportLocalMongoose = require('passport-local-mongoose');
-
-// app.use(require("express-session")({
-//     secret: "someText",
-//     resave: false,
-//     saveUninitialized: false
-// }));
-
-// // app.use(passport: initialize());
-// app.use(passport.session());
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
-// passport.use(new LocalStrategy(User.authenticate()));
-// //
-
-
-
-
-
-
-
+app.use(passport.initialize());
+app.use(passport.session());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+passport.use(new LocalStrategy(User.authenticate()));
+//
 
 const index = (req,res) => {
     res.render("index.ejs");
 }
 
 const create = (req,res) => {
-    res.render("create.ejs");
+    res.render("create.ejs", {message:""});
 }
 
 const created = (req,res) => {
-    //if valid data: insert to database, create session, then:
-        var newUser = new User(req.body);
-        newUser.save((err, user)=>{
-            if(err) return console.log(err);
-            console.log("Created a User!\n"+user);
-        });
-        res.redirect("/user");
-    //in case invalid data is received, res.redirect("/create"); with validation message
+    req.body.username
+    req.body.password
+    User.register(new User({username: req.body.username}), req.body.password, function(err,user){
+        if(err){
+            if(err.name == 'UserExistsError'){
+                var message = "Username already exists..."
+            }else{
+                var message = "Please enter a valid password!"
+            }
+            res.render('create.ejs', {message:message});
+            return console.log(err.name);
+        }else{
+            passport.authenticate("local")(req,res, function(){
+                // console.log('created! \n'+user)
+                res.redirect("/user");
+            });
+        };
+    });
 }
 
 const login = (req,res) => {
@@ -57,13 +55,38 @@ const login = (req,res) => {
 }
 
 const tryLogin = (req,res) => {
-    //if authenticated: create session then:
-      res.redirect("/user");
-    //else res.redirect("/login"); alongwith the message of wrong credentials
+    console.log('logged in!\n');
+    // //if authenticated: create session then:
+    //   res.redirect("/user");
+    // //else res.redirect("/login"); alongwith the message of wrong credentials
 }
 
 const loggedIn = (req,res) => {
-    res.send("Checks whether logged in (session set) if not then redirects to /login.<br\>Welcome for new users, secret post display for existing users");
+    // //cookie not defined as require('cookie'), neither installed
+    // res.setHeader('Set-Cookie', cookie.serialize('username', String(req.username), {
+    //     httpOnly: true,
+    //     maxAge: 60 * 60 * 24 * 7 // 1 week
+    //   }));
+   
+    //   // Redirect back after setting cookie
+    //   res.statusCode = 302;
+    //   res.setHeader('Location', req.headers.referer || '/');
+      res.send("This is your post");
+    //   res.end();
+    //   return;
+    // // editable post?
+}
+
+const logout = (req,res) => {
+    req.logout();
+    res.redirect("/");
+}
+
+const isLoggedIn = (req, res, next) => {
+    if(req.isAuthenticated()){
+        return next();
+    }
+    res.redirect('/login');
 }
 
 module.exports = {
@@ -72,5 +95,7 @@ module.exports = {
     created,
     login,
     tryLogin,
-    loggedIn
+    loggedIn,
+    isLoggedIn,
+    logout
 }
