@@ -3,6 +3,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var ejs = require('ejs');
 
+app.use(bodyParser.urlencoded({extended:true}));
+
 var baseController = require('./baseController.js');
 
 const port = process.env.PORT || 8000;
