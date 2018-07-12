@@ -1,0 +1,17 @@
+{
+  "name": "login-app",
+  "version": "1.0.0",
+  "description": "Logs you in",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "Prateek Joshi",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "nodemon": "^1.18.0"
+  }
+}
