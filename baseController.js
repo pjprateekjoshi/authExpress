@@ -75,15 +75,17 @@ const loggedIn = (req,res) => {
             res.render("user.ejs", {user:users});
         }
     });
-    //=================================
-    //          editable post?       //
-    //================================= 
+    //=========================================
+    //         deletable and editable post?
+    //=========================================
 }
 
 const logout = (req,res) => {
     console.log("Logging out " + req.cookies.username);
     res.clearCookie('connect.sid');
     res.clearCookie('username');
+    req.session.auth = null;                //new
+    req.session.destroy(function() {});     //functions
     req.logout();
     res.redirect("/");
 }
