@@ -2,8 +2,10 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var ejs = require('ejs');
+var cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(cookieParser());
 
 var baseController = require('./baseController.js');
 
@@ -32,23 +34,19 @@ passport.use(new LocalStrategy(User.authenticate()));
 
 const port = process.env.PORT || 8000;
 
-app.get('/', (req,res) => {baseController.index(req,res)});
+app.get('/', baseController.isLoggedOut, (req,res) => {baseController.index(req,res)});
 
-app.get('/create', (req,res) => {baseController.create(req,res)});
+app.get('/create', baseController.isLoggedOut, (req,res) => {baseController.create(req,res)});
 
 app.post('/create', (req,res) => {baseController.created(req,res)});
 
-app.get('/login', (req,res) => {baseController.login(req,res)});
+app.get('/login', baseController.isLoggedOut, (req,res) => {baseController.login(req,res)});
 
 app.post('/login', passport.authenticate("local",{
-    successRedirect: "/user",
     failureRedirect: "/login"
 }), (req,res) => {baseController.tryLogin(req,res)});
 
-app.get('/logout', (req,res) => {
-    req.logout();
-    res.redirect("/");
-});
+app.get('/logout', (req,res) => {baseController.logout(req,res)});
 
 app.get('/user', baseController.isLoggedIn, (req,res) => {baseController.loggedIn(req,res)});
 

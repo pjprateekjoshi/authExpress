@@ -36,14 +36,17 @@ const created = (req,res) => {
         if(err){
             if(err.name == 'UserExistsError'){
                 var message = "Username already exists..."
+            }else if(err.name == 'MissingPasswordError' || err.name == 'MissingUsernameError'){
+                var message = "Please enter a valid username and password!"
             }else{
-                var message = "Please enter a valid password!"
+                var message = "Some unknown error occured, contact the developer!" + err.name;
             }
             res.render('create.ejs', {message:message});
-            return console.log(err.name);
+            return console.log('Signup error:' + err.name);
         }else{
             passport.authenticate("local")(req,res, function(){
-                // console.log('created! \n'+user)
+                console.log('created:' + user.username);
+                res.cookie("username", user.username);
                 res.redirect("/user");
             });
         };
@@ -51,33 +54,28 @@ const created = (req,res) => {
 }
 
 const login = (req,res) => {
-    res.render("login.ejs");
+    res.render("login.ejs", {message:""});
 }
 
 const tryLogin = (req,res) => {
     console.log('logged in!\n');
-    // //if authenticated: create session then:
-    //   res.redirect("/user");
-    // //else res.redirect("/login"); alongwith the message of wrong credentials
+    console.log(req.user.username);
+    res.cookie("username", req.user.username);
+    res.redirect("/user");
 }
 
 const loggedIn = (req,res) => {
-    // //cookie not defined as require('cookie'), neither installed
-    // res.setHeader('Set-Cookie', cookie.serialize('username', String(req.username), {
-    //     httpOnly: true,
-    //     maxAge: 60 * 60 * 24 * 7 // 1 week
-    //   }));
-   
-    //   // Redirect back after setting cookie
-    //   res.statusCode = 302;
-    //   res.setHeader('Location', req.headers.referer || '/');
-      res.send("This is your post");
-    //   res.end();
-    //   return;
-    // // editable post?
+    const username = req.cookies.username;
+    res.send("Hello!" + username);
+    //=================================
+    //          editable post?       //
+    //================================= 
 }
 
 const logout = (req,res) => {
+    console.log("Logging out " + req.cookies.username);
+    res.clearCookie('connect.sid');
+    res.clearCookie('username');
     req.logout();
     res.redirect("/");
 }
@@ -86,7 +84,14 @@ const isLoggedIn = (req, res, next) => {
     if(req.isAuthenticated()){
         return next();
     }
-    res.redirect('/login');
+    res.render('login.ejs', {message:"Log in first!"});
+}
+
+const isLoggedOut = (req, res, next) => {
+    if(!req.isAuthenticated()){
+        return next();
+    }
+    res.redirect('/user');
 }
 
 module.exports = {
@@ -97,5 +102,6 @@ module.exports = {
     tryLogin,
     loggedIn,
     isLoggedIn,
+    isLoggedOut,
     logout
 }
