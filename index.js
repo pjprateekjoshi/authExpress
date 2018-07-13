@@ -28,10 +28,6 @@ passport.use(new LocalStrategy(User.authenticate()));
 //
 
 
-
-
-
-
 const port = process.env.PORT || 8000;
 
 app.get('/', baseController.isLoggedOut, (req,res) => {baseController.index(req,res)});
@@ -49,5 +45,7 @@ app.post('/login', passport.authenticate("local",{
 app.get('/logout', (req,res) => {baseController.logout(req,res)});
 
 app.get('/user', baseController.isLoggedIn, (req,res) => {baseController.loggedIn(req,res)});
+
+app.post('/user', baseController.isLoggedIn, (req,res) => {baseController.submitSecret(req,res)});
 
 app.listen(port, ()=>{console.log(`Listening on port ${port}.............`)});

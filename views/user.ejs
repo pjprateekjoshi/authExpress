@@ -1,0 +1,23 @@
+<%- include partials/header.ejs %>
+
+<h1>Welcome <%= user.foundUser.username %>!</h1>
+<div class="container jumbotron">
+    <ol>
+        <% user.secrets.forEach(function(secret){ %>
+            <li>
+                <div class="alert-success">
+                <%= secret.content %>
+                </div>
+            </li>
+        <%});%>
+    </ol>
+    <form method="POST">
+        <textarea name="secret" placeholder="new secret"></textarea>
+        <br/>
+        <input type="submit" name="submit" value="Submit">
+    </form>
+</div>
+
+<a href="/logout">Logout</a>
+
+<%- include partials/footer.ejs %>

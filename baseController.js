@@ -39,7 +39,7 @@ const created = (req,res) => {
             }else if(err.name == 'MissingPasswordError' || err.name == 'MissingUsernameError'){
                 var message = "Please enter a valid username and password!"
             }else{
-                var message = "Some unknown error occured, contact the developer!" + err.name;
+                var message = "Some unknown error occured, contact the developer! Ref id:" + err.name;
             }
             res.render('create.ejs', {message:message});
             return console.log('Signup error:' + err.name);
@@ -66,7 +66,15 @@ const tryLogin = (req,res) => {
 
 const loggedIn = (req,res) => {
     const username = req.cookies.username;
-    res.send("Hello!" + username);
+    User.findOne({username : username}, function(err,foundUser){
+        if(err){
+            console.log(err);
+        }else{
+            var secrets = foundUser.secrets;
+            var users = {foundUser, secrets};
+            res.render("user.ejs", {user:users});
+        }
+    });
     //=================================
     //          editable post?       //
     //================================= 
@@ -94,6 +102,31 @@ const isLoggedOut = (req, res, next) => {
     res.redirect('/user');
 }
 
+const submitSecret = (req,res) => {
+    var secret = req.body.secret;
+    var username = req.cookies.username;
+
+    User.findOne({username:username}, function(err,user){
+        if (err){
+            console.log(err)
+        }else{
+            user.secrets.push({
+                content: secret
+            });
+
+            user.save((err, result)=>{
+                if (err){
+                    console.log(err);
+                }else{
+                    console.log(result);
+                    res.redirect("/user");
+                }
+            });
+        }
+    })
+}
+
+
 module.exports = {
     index,
     create,
@@ -103,5 +136,7 @@ module.exports = {
     loggedIn,
     isLoggedIn,
     isLoggedOut,
-    logout
+    logout,
+
+    submitSecret
 }
