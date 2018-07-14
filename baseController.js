@@ -65,6 +65,9 @@ const tryLogin = (req,res) => {
 }
 
 const loggedIn = (req,res) => {
+    res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.header('Pragma', 'no-cache');
+    res.header('Expires', 0);
     const username = req.cookies.username;
     User.findOne({username : username}, function(err,foundUser){
         if(err){
