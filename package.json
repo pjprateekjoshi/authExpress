@@ -5,7 +5,10 @@
   "description": "Logs you in",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "test": "node index.js",
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js"
+ 
   },
   "author": "Prateek Joshi",
   "license": "UNLICENSED",
