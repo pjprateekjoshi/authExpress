@@ -1,6 +1,6 @@
 var passportLocalMongoose = require("passport-local-mongoose");
 var mongoose = require ('mongoose');
-mongoose.connect("mongodb://localhost/authExpress-test");
+mongoose.connect("mongodb://pjprateekjoshi:password0@ds137631.mlab.com:37631/auth-express");
 
 var secretSchema = new mongoose.Schema({
     content: String
